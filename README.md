@@ -8,6 +8,7 @@ PojoToSQLite is an object database where Java objects are stored in the SQLite d
 <code>
 	
 	dFlex = new DFlex(db);
+
 	dFlex.createTableFromClass(Visit.class.getName());
 	dFlex.createTableFromClass(User.class.getName());
 </code>
