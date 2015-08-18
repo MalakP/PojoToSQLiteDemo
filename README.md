@@ -21,7 +21,7 @@ PojoToSQLite is an object database where Java objects are stored in the SQLite d
 	e.g.
 <pre>
     <div>
-            DatabaseHelper.getInstance(MainActivity.this).addObjectToTable(lUser, User.class.getName(), true);
+        DatabaseHelper.getInstance(MainActivity.this).addObjectToTable(lUser, User.class.getName(), true);
     </div>
 </pre>
 
