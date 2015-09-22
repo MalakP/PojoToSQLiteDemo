@@ -30,7 +30,7 @@ public class DFlex {
         mAllowedTypes = new ArrayList<>();
         mAllowedTypes.add(Long.class);
         mAllowedTypes.add(Integer.class);
-        mAllowedTypes.add(boolean.class);
+        mAllowedTypes.add(Boolean.class);
         mAllowedTypes.add(String.class);
     }
 
@@ -54,8 +54,10 @@ public class DFlex {
         boolean firstField = true;
 
         for (Field field : fields) {
-            if(!mAllowedTypes.contains(field.getType()))
+            if(!mAllowedTypes.contains(field.getType())) {
+                Log.w("DFlex","Field type: "+field.getType()+" is not allowed");
                 continue;
+            }
             if (!firstField) {
                 queryBuilder.append(", ");
             }
@@ -66,7 +68,7 @@ public class DFlex {
             }
             else
             if (field.getType() == Long.class || field.getType()==Integer.class ||
-                    field.getType() == boolean.class) {
+                    field.getType() == Boolean.class) {
                 queryBuilder.append("INTEGER");
             }
             Annotation annotation = field.getAnnotation(Attributes.class);
@@ -126,8 +128,8 @@ public class DFlex {
                 if (field.getType() == Long.class && field.get(pObject)!=null) {
                     values.put(field.getName(), (Long)field.get(pObject));
                 }else
-                if (field.getType() == boolean.class && field.get(pObject)!=null) {
-                    values.put(field.getName(), (int)field.get(pObject));
+                if (field.getType() == Boolean.class && field.get(pObject)!=null) {
+                    values.put(field.getName(), (Boolean)field.get(pObject)==true?1:0);
                 }
 
             } catch (IllegalAccessException e) {
@@ -179,15 +181,18 @@ public class DFlex {
                     field.set(object, pCursor.getString(count));
                     count++;
                 }else
-                if ((field.getType() == Long.class ||field.getType() == Integer.class ||
-                        field.getType() == boolean.class) && !pCursor.isAfterLast()) {
+                if ((field.getType() == Long.class ) && !pCursor.isAfterLast()) {
                     field.set(object, pCursor.getLong(count));
                     count++;
                 }else
-                if((field.getType() == Integer.class ||
-                        field.getType() == boolean.class) &&
+                if((field.getType() == Integer.class) &&
                         !pCursor.isAfterLast()){
                     field.set(object, pCursor.getInt(count));
+                    count++;
+                }else
+                if((field.getType() == Boolean.class) &&
+                        !pCursor.isAfterLast()){
+                    field.set(object, pCursor.getInt(count)!=0);
                     count++;
                 }
 
