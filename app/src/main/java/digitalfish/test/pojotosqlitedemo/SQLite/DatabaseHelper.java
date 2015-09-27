@@ -28,7 +28,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "POJO2SQL";
 
 
-    DFlex dFlex;
+    IDFlex dFlex;
 
 
     public DatabaseHelper(Context context) {
@@ -104,7 +104,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         Object lObject = dFlex.getDataToObject(cursor, pClassName);
 
-        cursor.close();
+        if (cursor != null) {
+            cursor.close();
+        }
         db.close();
         return lObject;
     }
@@ -141,18 +143,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = db.query(name, null, pSelection,
                 pArguments, null, null, null, null);
 
-        if (cursor != null)
+        if (cursor != null) {
             cursor.moveToFirst();
-
-        while (!cursor.isAfterLast()) {
-            Object lObject = dFlex.getDataToObject(cursor, pClasName);
-            if(lObject!=null)
-                lObjects.add(lObject);
-
-            cursor.moveToNext();
+            while (!cursor.isAfterLast()) {
+                Object lObject = dFlex.getDataToObject(cursor, pClasName);
+                if(lObject!=null)
+                    lObjects.add(lObject);
+                cursor.moveToNext();
+            }
+            cursor.close();
         }
-
-        cursor.close();
         db.close();
         return lObjects;
 

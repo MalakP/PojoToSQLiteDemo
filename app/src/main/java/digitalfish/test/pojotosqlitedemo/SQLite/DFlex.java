@@ -19,7 +19,7 @@ import java.util.List;
  * to write and read data from database.
  * execution draft copied from: http://pygmalion.nitri.de/create-sqlite-tables-from-data-classes-on-android-154.html
  */
-public class DFlex {
+public class DFlex implements IDFlex{
 
     SQLiteDatabase db;
     List<Class<?>> mAllowedTypes;
@@ -38,7 +38,7 @@ public class DFlex {
 
     public void createTableFromClass(String className) {
 
-        Field[] fields = null;
+        Field[] fields;
 
         StringBuilder queryBuilder = new StringBuilder();
 
@@ -49,6 +49,7 @@ public class DFlex {
             queryBuilder.append("CREATE TABLE " + name + " (");
         } catch (Exception e) {
             Log.e("ERROR", e.getMessage());
+            return;
         }
 
         boolean firstField = true;
@@ -73,11 +74,9 @@ public class DFlex {
             }
             Annotation annotation = field.getAnnotation(Attributes.class);
             if (annotation != null) {
-                if (annotation instanceof Attributes) {
-                    Attributes attr = (Attributes) annotation;
-                    if (attr.primaryKey())
-                        queryBuilder.append(" PRIMARY KEY");
-                }
+                Attributes attr = (Attributes) annotation;
+                if (attr.primaryKey())
+                    queryBuilder.append(" PRIMARY KEY");
             }
 
             firstField = false;
@@ -97,7 +96,7 @@ public class DFlex {
             name = clazz.getSimpleName();
 
         } catch (ClassNotFoundException e) {
-            Log.e("ABDH","problrm dropping table: "+name);
+            Log.e("ABDH","problrem dropping table: "+name);
         }
         return name;
     }
@@ -129,7 +128,7 @@ public class DFlex {
                     values.put(field.getName(), (Long)field.get(pObject));
                 }else
                 if (field.getType() == Boolean.class && field.get(pObject)!=null) {
-                    values.put(field.getName(), (Boolean)field.get(pObject)==true?1:0);
+                    values.put(field.getName(), (Boolean)field.get(pObject)?1:0);
                 }
 
             } catch (IllegalAccessException e) {
