@@ -166,4 +166,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return res;
     }
+
+    public synchronized void updateObject(String pClassName, String pFieldName, Object pNewValue, String pSelection, String[]pArguments){
+        SQLiteDatabase db = this.getWritableDatabase();
+        dFlex = new DFlex(db);
+
+        dFlex.updateObjectDataToTable(pClassName, pFieldName, pNewValue, pSelection, pArguments);
+
+        db.close(); // Closing database connection
+    }
 }

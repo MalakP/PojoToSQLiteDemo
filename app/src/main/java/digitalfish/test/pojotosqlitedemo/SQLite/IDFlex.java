@@ -35,4 +35,14 @@ public interface IDFlex {
      * @return created object.
      */
     Object getDataToObject(Cursor pCursor, String pClassName);
+
+    /**
+     * Updates selected field in data base.
+     * @param pClassName class/table name to update
+     * @param pFieldName field to update
+     * @param pNewValue updated value
+     * @param pSelection select clause (id=? AND name=?)
+     * @param pArguments arguments for select
+     */
+    void updateObjectDataToTable(String pClassName, String pFieldName, Object pNewValue, String pSelection, String[] pArguments);
 }

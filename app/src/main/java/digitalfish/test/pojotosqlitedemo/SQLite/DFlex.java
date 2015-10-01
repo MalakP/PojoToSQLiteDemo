@@ -138,6 +138,45 @@ public class DFlex implements IDFlex{
 
         db.insert(lTableName, null, values);
     }
+    public void updateObjectDataToTable(String pClassName,String pFieldName, Object pNewValue,   String pSelection, String[]pArguments) {
+        Field[] fields;
+        String lTableName;
+
+        try {
+            Class<?> clazz = Class.forName(pClassName);
+            fields = clazz.getDeclaredFields();
+            lTableName = clazz.getSimpleName();
+
+        } catch (ClassNotFoundException e) {
+            Log.e("ERROR", e.getMessage());
+            return;
+        }
+
+        ContentValues values = new ContentValues();
+
+        for(Field field:fields){
+            if(field.getName().equals(pFieldName)) {
+                field.setAccessible(true);
+                try {
+                    if (String.class.isAssignableFrom(field.getType()) && (pNewValue) != null) {
+                        values.put(field.getName(), (String) (pNewValue));
+                    } else if (field.getType() == Long.class && (pNewValue) != null) {
+                        values.put(field.getName(), (Long) (pNewValue));
+                    } else if (field.getType() == Integer.class && (pNewValue) != null) {
+                        values.put(field.getName(), (Integer) (pNewValue));
+                    } else if (field.getType() == Boolean.class && (pNewValue) != null) {
+                        values.put(field.getName(), (Boolean) (pNewValue) == true ? 1 : 0);
+                    }
+
+                } catch (Exception e) {
+                    Log.e("ERROR", e.getMessage());
+                }
+            }
+        }
+
+        if(values!=null && values.size()>0)
+            db.update(lTableName, values, pSelection, pArguments);
+    }
 
     public Object getDataToObject(Cursor pCursor, String pClassName) {
 
@@ -202,4 +241,6 @@ public class DFlex implements IDFlex{
         }
         return object;
     }
+
+
 }
