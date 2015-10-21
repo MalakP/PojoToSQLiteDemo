@@ -175,4 +175,64 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         db.close(); // Closing database connection
     }
+
+    SQLiteDatabase db_no_check;
+    public  void openTransaction(){
+        db_no_check = this.getWritableDatabase();
+        db_no_check.beginTransaction();
+    }
+
+    public void closeTransaction(){
+        db_no_check.setTransactionSuccessful();
+        db_no_check.endTransaction();
+        db_no_check.close();
+    }
+
+    /*
+    Methods with names containing sufix "NoCheck" required to use method "openTransaction" in the first place.
+     */
+    public synchronized void addObjectToTableNoCheck(Object pObject, String pClassName) {
+        dFlex = new DFlex(db_no_check);
+        dFlex.addObjectDataToTable(pObject, pClassName);
+    }
+
+    public synchronized boolean deleteNoCheck(String pClassName, String pSelection, String[]pArguments){
+
+        dFlex = new DFlex(db_no_check);
+        String name= dFlex.getClassName(pClassName);
+        boolean res = db_no_check.delete(name, pSelection, pArguments)>0;
+
+        return res;
+    }
+    public synchronized List<Object> getListOfObjectsNoCheck(String pClasName, String pSelection, String[]pArguments, String orderBy ){
+        List<Object>lObjects = new ArrayList<>();
+        dFlex = new DFlex(db_no_check);
+        String name= dFlex.getClassName(pClasName);
+        Cursor cursor = db_no_check.query(name, null,pSelection,
+                pArguments, null, null, orderBy, null);
+
+        if (cursor != null)
+            cursor.moveToFirst();
+
+        while (!cursor.isAfterLast()) {
+            Object lObject = dFlex.getDataToObject(cursor, pClasName);
+            if(lObject!=null)
+                lObjects.add(lObject);
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return lObjects;
+    }
+
+    public synchronized Object getObjectFromTableNoCheck(String pClassName, String pSelection, String[]pArguments) {
+        dFlex = new DFlex(db_no_check);
+        String name= dFlex.getClassName(pClassName);
+        Cursor cursor = db_no_check.query(name, null, pSelection,
+                pArguments, null, null, null, null);
+        if (cursor != null)
+            cursor.moveToFirst();
+        Object lObject = dFlex.getDataToObject(cursor, pClassName);
+        cursor.close();
+        return lObject;
+    }
 }
