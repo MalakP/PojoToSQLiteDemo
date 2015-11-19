@@ -12,14 +12,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * 2015-07-21.
- * Helper class for transforming Java objects into SQLite database tables using reflections. It provides basic methods
- * to write and read data from database.
  * execution draft copied from: http://pygmalion.nitri.de/create-sqlite-tables-from-data-classes-on-android-154.html
  */
-public class DFlex implements IDFlex{
+public class DFlex implements IDFlex {
 
     SQLiteDatabase db;
     List<Class<?>> mAllowedTypes;
@@ -32,13 +29,14 @@ public class DFlex implements IDFlex{
         mAllowedTypes.add(Integer.class);
         mAllowedTypes.add(Boolean.class);
         mAllowedTypes.add(String.class);
+        mAllowedTypes.add(Double.class);
     }
 
 
 
     public void createTableFromClass(String className) {
 
-        Field[] fields;
+        Field[] fields = null;
 
         StringBuilder queryBuilder = new StringBuilder();
 
@@ -49,7 +47,6 @@ public class DFlex implements IDFlex{
             queryBuilder.append("CREATE TABLE " + name + " (");
         } catch (Exception e) {
             Log.e("ERROR", e.getMessage());
-            return;
         }
 
         boolean firstField = true;
@@ -71,12 +68,16 @@ public class DFlex implements IDFlex{
             if (field.getType() == Long.class || field.getType()==Integer.class ||
                     field.getType() == Boolean.class) {
                 queryBuilder.append("INTEGER");
-            }
+            }else
+            if(field.getType() == Double.class)
+                queryBuilder.append("REAL");
             Annotation annotation = field.getAnnotation(Attributes.class);
             if (annotation != null) {
-                Attributes attr = (Attributes) annotation;
-                if (attr.primaryKey())
-                    queryBuilder.append(" PRIMARY KEY");
+                if (annotation instanceof Attributes) {
+                    Attributes attr = (Attributes) annotation;
+                    if (attr.primaryKey())
+                        queryBuilder.append(" PRIMARY KEY");
+                }
             }
 
             firstField = false;
@@ -96,7 +97,7 @@ public class DFlex implements IDFlex{
             name = clazz.getSimpleName();
 
         } catch (ClassNotFoundException e) {
-            Log.e("ABDH","problrem dropping table: "+name);
+            Log.e("ABDH","problrm dropping table: "+name);
         }
         return name;
     }
@@ -127,9 +128,15 @@ public class DFlex implements IDFlex{
                 if (field.getType() == Long.class && field.get(pObject)!=null) {
                     values.put(field.getName(), (Long)field.get(pObject));
                 }else
-                if (field.getType() == Boolean.class && field.get(pObject)!=null) {
-                    values.put(field.getName(), (Boolean)field.get(pObject)?1:0);
+                if (field.getType() == Integer.class && field.get(pObject)!=null) {
+                    values.put(field.getName(), (Integer)field.get(pObject));
                 }
+                else
+                if (field.getType() == Boolean.class && field.get(pObject)!=null) {
+                    values.put(field.getName(), (Boolean)field.get(pObject)==true?1:0);
+                }else
+                if(field.getType() == Double.class && field.get(pObject)!=null)
+                    values.put(field.getName(),(Double)field.get(pObject));
 
             } catch (IllegalAccessException e) {
                 Log.e("ERROR", e.getMessage());
@@ -138,6 +145,7 @@ public class DFlex implements IDFlex{
 
         db.insert(lTableName, null, values);
     }
+
     public void updateObjectDataToTable(String pClassName,String pFieldName, Object pNewValue,   String pSelection, String[]pArguments) {
         Field[] fields;
         String lTableName;
@@ -166,6 +174,8 @@ public class DFlex implements IDFlex{
                         values.put(field.getName(), (Integer) (pNewValue));
                     } else if (field.getType() == Boolean.class && (pNewValue) != null) {
                         values.put(field.getName(), (Boolean) (pNewValue) == true ? 1 : 0);
+                    }else if (field.getType() == Double.class && (pNewValue) != null) {
+                        values.put(field.getName(), (Double) (pNewValue));
                     }
 
                 } catch (Exception e) {
@@ -231,6 +241,11 @@ public class DFlex implements IDFlex{
                 if((field.getType() == Boolean.class) &&
                         !pCursor.isAfterLast()){
                     field.set(object, pCursor.getInt(count)!=0);
+                    count++;
+                }else
+                if((field.getType() == Double.class) &&
+                        !pCursor.isAfterLast()){
+                    field.set(object, pCursor.getDouble(count));
                     count++;
                 }
 

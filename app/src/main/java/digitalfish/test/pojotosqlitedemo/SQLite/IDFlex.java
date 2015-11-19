@@ -6,7 +6,7 @@ import android.database.Cursor;
  * An interface to the DFlex class
  * Created by Piotr Malak on 2015-09-27.
  */
-public interface IDFlex {
+public interface IDFlex  {
 
     /**
      * Creates SQLite Database table based on POJO class;
